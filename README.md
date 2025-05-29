@@ -19,22 +19,29 @@
   - ...
 - [ ] Performance improvements
 
+<br/>
 
-## Installation
+# Installation
+- You must complete all of the following steps for it to work.
 
-### 1. Install required packages
+<br/>
+
+## 1. Install required packages
 ```sh
 npm i markmap-lib markmap-view markmap-toolbar he @types/he
 ```
 
-### 2. Add files
+<br/>
+
+## 2. Add files
 - `mindmap.ts` -> `quartz/plugins/transformers`
 - `Mindmap.tsx` -> `quartz/components`
 - `mindmap.inline.ts` -> `quartz/components/scripts`
 - `mindmap.scss` -> `quartz/components/styles`
 
-### 3. Edit files
-#### `quartz/components/index.ts`
+<br/>
+
+## 3. Edit `quartz/components/index.ts`
 ```ts
 import Mindmap from './Mindmap'
 
@@ -43,13 +50,17 @@ export{
   Mindmap
 }
 ```
----
-#### `quartz/plugins/transformers/index.ts`
+
+<br/>
+
+## 4. Edit `quartz/plugins/transformers/index.ts`
 ```ts
 export { Mindmap } from "./mindmap"
 ```
----
-#### `quartz/plugins/transformers/links.ts`
+
+<br/>
+
+## 5. Edit `quartz/plugins/transformers/links.ts`
 - Add `export` before `interface Options` and `const defaultOptions`
 ```ts
 export interface Options {
@@ -60,24 +71,30 @@ export const defaultOptions: Options = {
   ...
 }
 ```
----
-#### `quartz/components/scripts/popover.inline.ts`
+
+<br/>
+
+## 6. Edit `quartz/components/scripts/popover.inline.ts`
 - Add this at the end of the file
 ```ts
 export { mouseEnterHandler, clearActivePopover }
 ```
----
-#### `Replace or edit i18n`
+
+<br/>
+
+## 7. Replace `i18n` or `edit title`
 - `quartz/components/Mindmap.tsx`
 ```ts
-130         <h3>{i18n(cfg.locale).components.mindmap.title}</h3>
+130         <h3>{i18n(cfg.locale).components.mindmap.title}</h3> // by replacing the i18n
 ```
 - If not using i18n
 ```ts
-130         <h3>Mind Map</h3>
+130         <h3>Mind Map</h3> // edit title
 ```
----
-#### `quartz.config.ts`
+
+<br/>
+
+## 8. Edit `quartz.config.ts`
 - Add the transformer
 - (!) **The options must be the same as those of CrawlLinks.**
 ```ts
@@ -92,9 +109,9 @@ export { mouseEnterHandler, clearActivePopover }
   }
 ```
 
----
+<br/>
 
-#### `quartz.layout.ts`
+## 9. Edit `quartz.layout.ts`
 - Use one of three mode options: view, button, or global.
 ```ts
 Component.Mindmap({
@@ -137,6 +154,8 @@ export const defaultContentPageLayout: PageLayout = {
   ]
 }
 ```
+
+<br/>
 
 # Done!
 - Enjoy the Mind Map!
