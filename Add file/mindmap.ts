@@ -1,20 +1,73 @@
-import { QuartzTransformerPlugin } from "../quartz/plugins/types"
+import { QuartzTransformerPlugin } from "../types"
 import {
   TransformOptions,
   FullSlug,
   transformLink,
-  slugifyFilePath,
-  FilePath,
-  SimpleSlug,
-  transformInternalLink,
-  RelativeURL
-} from "../quartz/util/path"
-import { defaultOptions, Options } from '../quartz/plugins/transformers/links'
+} from "../../util/path"
+import { defaultOptions, Options } from './links'
 import { IPureNode } from 'markmap-common'
-import { Transformer } from "markmap-lib"
+import { Transformer, builtInPlugins } from "markmap-lib"
+import { canonicalizeCallout } from "./ofm"
 import hePkg from "he";
 
-// import { JSResource, CSSResource } from "../../util/resources"
+const { decode } = hePkg;
+
+const wikilinkRegex = /(!)?\[\[(?<link>[^|\]#]+)(?:#(?<fragment>[^|\]]+))?\|?(?<displayText>[^\]]*)\]\]|(?<!:)#(?<tag>[A-Za-z0-9_-]+)(?=\s|$)/g
+const imageEmbedRegex = /^(?<width>\d+)(x(?<height>\d+))?$/
+const youtubeImageRegex = /<img\b[^>]*\bsrc=["'](https?:\/\/(?:www\.)?youtu[^\s"'>]*)["'][^>]*>/g
+const calloutRegex = /<blockquote\b[^>]*>\s*<p\b[^>]*>\s*\[!(?<type>\w+)\]\s*(?<remain>[\s\S]*?)<\/p>/g
+
+const recurseChildren = (fn: (node: IPureNode) => void) => (node: IPureNode) => {
+  fn(node)
+  node.children?.forEach(recurseChildren(fn))
+}
+
+function* matchRegex(str: string, regex: RegExp) {
+  while (true) {
+    const match = regex.exec(str)
+    if (!match) break
+    yield match
+  }
+}
+
+function replaceMatches(str: string, regex: RegExp, replacer: (match: RegExpExecArray) => string) {
+  let accumulator = str
+  const matches = matchRegex(str, regex)
+  for (const match of matches)
+    accumulator = accumulator.replace(match[0], replacer(match))
+  return accumulator
+}
+
+function toYouTubeEmbedURL(link: string) {
+  try {
+    const url = new URL(link)
+
+    if (url.hostname === "youtu.be") {
+      const id = url.pathname.slice(1)
+      return `https://www.youtube.com/embed/${id}`
+    }
+
+    if (url.hostname.includes("youtube.com")) {
+      const playlistId = url.searchParams.get("list")
+      if (url.pathname.startsWith("/playlist") && playlistId) {
+        return `https://www.youtube.com/embed/videoseries?list=${playlistId}`
+      }
+
+      const videoId = url.searchParams.get("v")
+      if (url.pathname.startsWith("/watch") && videoId) {
+        return `https://www.youtube.com/embed/${videoId}`
+      }
+
+      if (url.pathname.startsWith("/embed/")) {
+        return link
+      }
+    }
+
+    return null
+  } catch {
+    return null
+  }
+}
 
 export const Mindmap: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
@@ -22,72 +75,125 @@ export const Mindmap: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => 
   return {
     name: "Mindmap",
     markdownPlugins(ctx) {
-      const transformer = new Transformer()
+      const transformer = new Transformer([
+        ...builtInPlugins,
+      ])
       const transformOptions: TransformOptions = {
         strategy: opts.markdownLinkResolution,
         allSlugs: ctx.allSlugs,
       }
-      const { decode } = hePkg;
 
-      // todo : bfs replace all links in the tree
-      const recurseChildren = (fn: (node: IPureNode) => void) => (node: IPureNode) => {
-        fn(node)
-        node.children?.forEach(recurseChildren(fn))
-      }
-
-      function* matchRegex(str: string, regex: RegExp) {
-        while (true) {
-          const match = regex.exec(str)
-          if (!match) break
-          yield match
-        }
-      }
-
-      function replaceMatches(str: string, regex: RegExp, replacer: (match: RegExpExecArray) => string) {
-        let accumulator = str
-        const matches = matchRegex(str, regex)
-        for (const match of matches)
-          accumulator = accumulator.replace(match[0], replacer(match))
-        return accumulator
-      }
-
-      const wikilinkRegex = /(!)?\[\[(?<link>[^|\]]+)\|?(?<displayText>[^\]]*)\]\]|(?<!:)#(?<tag>[A-Za-z0-9_-]+)(?=\s|$)/g
-
-      // todo: allow for all types
-      function replacement(currentSlug: FullSlug) {
+      function wikilinkReplacement(currentSlug: FullSlug) {
         return (match: RegExpExecArray) => {
-          const { link, displayText, tag } = match.groups!
+          const { link, fragment, displayText, tag } = match.groups!
 
           if (link) {
-            const isImage = /\.(png|jpg|jpeg|gif|bmp|svg|webp)$/.test(link)
-            const url = transformLink(currentSlug, encodeURI(decode(link.trim())), transformOptions)
+            let url = transformLink(currentSlug, encodeURI(decode(link.trim() + (fragment ? "#" + fragment.trim() : ""))), transformOptions)
 
-            if (isImage) {
-              return `<img src="${url}" alt="${displayText || link}" />`
+            if (match[1] !== "!") {
+              return `<a href="${url}" class="internal">${displayText || link + (fragment ? "#" + fragment : "")}</a>`
+            }
+
+            if (/\.(png|jpg|jpeg|gif|bmp|svg|webp)$/.test(link)) {
+              if (fragment) {
+                url = transformLink(currentSlug, encodeURI(decode(link.trim())), transformOptions)
+              }
+              const imageEmbedMatch = imageEmbedRegex.exec(displayText || "")
+              const width = imageEmbedMatch?.groups?.width ? imageEmbedMatch?.groups?.width + "px" : "auto"
+              const height = imageEmbedMatch?.groups?.height ? imageEmbedMatch?.groups?.height + "px" : "auto"
+              return `<img src="${url}" alt="${fragment ?? displayText ?? link}" style="height:${height}; width:${width}; max-width: 640px;" />`
+            } else if (/\.(mp4|webm|ogv|avi|mov|flv|wmv|mkv|mpg|mpeg|m4v)$/.test(link)) {
+              return `<video src="${url}" controls></video>`
+            } else if (/\.(mp3|wav|m4a|ogg|3gp|flac)$/.test(link)) {
+              return `<audio src="${url}" controls style="width: 640px;"></audio>`
+            } else if (/\.(pdf)$/.test(link)) {
+              return `<iframe src="${url}" class="pdf" style="width: 860px;"></iframe>`
             }
 
             return `<a href="${url}" class="internal">${displayText || link}</a>`
           } else if (tag) {
             return `<a href="/tags/${tag}" class="internal">#${tag}</a>`
           }
-          return match[0] ?? ""
+          return match[0]
         }
       }
 
+      function ytLinkReplacement() {
+        return (match: RegExpExecArray) => {
+          if (match[1]) {
+            const embedUrl = toYouTubeEmbedURL(match[1])
+            if (embedUrl) {
+              return `
+                <iframe
+                  class="external-embed youtube"
+                  allow="fullscreen"
+                  frameborder="0"
+                  src="${embedUrl}">
+                </iframe>
+                `
+            }
+          }
+          return match[0]
+        }
+      }
+
+      function calloutReplacement() {
+        return (match: RegExpExecArray) => {
+          const { type, remain } = match.groups!
+
+          if (type) {
+            const typeClass = canonicalizeCallout(type.toLowerCase())
+            const contents = remain.replace(/<br\s*\/?>/g, "")
+            return `
+            <blockquote class="callout ${typeClass}" data-callout="${typeClass}" style="max-width: 640px; width: auto;">
+              <div class="callout-title">
+                <div class="callout-icon"></div>
+                <div class="callout-title-inner"><p>${type}</p></div>
+              </div>
+              ${contents ?
+                `
+                <div class="callout-content">
+                  <div class="callout-content-inner">
+                    <p>${contents}</p>
+                  </div>
+                </div>
+                `
+                : ""}
+            </blockquote>
+            `
+          }
+          return match[0]
+        }
+      }
+
+      function processMindmapFile(file: any, transformer: Transformer, slug: FullSlug) {
+        const root: IPureNode = transformer.transform(String(file.value)).root
+
+        recurseChildren((node) => {
+          node.content = replaceMatches(
+            node.content,
+            wikilinkRegex,
+            wikilinkReplacement(slug)
+          )
+          node.content = replaceMatches(
+            node.content,
+            youtubeImageRegex,
+            ytLinkReplacement()
+          )
+          node.content = replaceMatches(
+            node.content,
+            calloutRegex,
+            calloutReplacement()
+          )
+        })(root)
+
+        file.data.mindmap = root
+      }
+
       return [() => {
-        return (_, file) => {
+        return (_: any, file: any) => {
           const slug = file.data.slug!
-          const root: IPureNode = transformer.transform(String(file.value)).root
-
-          recurseChildren((node) => {
-            node.content = replaceMatches(
-              node.content,
-              wikilinkRegex,
-              replacement(slug)
-            )
-          })(root)
-
-          file.data.mindmap = root
+          processMindmapFile(file, transformer, slug)
         }
       }]
     },

@@ -1,6 +1,6 @@
-import { registerEscapeHandler, removeAllChildren } from "../quartz/components/scripts/util"
-import { mouseEnterHandler, clearActivePopover } from '../quartz/components/scripts/popover.inline'
-import { GlobalMindmapConfig, LocalMindmapConfig } from '../quartz/components/Mindmap'
+import { registerEscapeHandler, removeAllChildren } from "./util"
+import { mouseEnterHandler, clearActivePopover } from './popover.inline'
+import { GlobalMindmapConfig, LocalMindmapConfig } from '../Mindmap'
 import { Markmap, deriveOptions } from "markmap-view"
 import { Toolbar } from "markmap-toolbar"
 import { IPureNode } from 'markmap-common'
@@ -185,8 +185,8 @@ async function renderMindmap(mindmap: HTMLElement) {
 
   renderToolbar(mindmap, mm, option)
   renderMermaidInMindmap(svg)
-  renderPopoverInMindmap()
   addExternalIcon(svg)
+  renderPopoverInMindmap()
 
   return () => {
     mindmap.innerHTML = ""

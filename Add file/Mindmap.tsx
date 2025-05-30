@@ -58,7 +58,7 @@ const defaultOptions: MindmapOptions = {
     zoom: true,
     pan: true,
     spacingHorizontal: 80,
-    spacingVertical: 5,
+    spacingVertical: 7,
     scrollForPan: false,
     zoomInIcon: true,
     zoomOutIcon: true,

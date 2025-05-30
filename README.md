@@ -8,16 +8,17 @@
 ## Supported Features
 - [x] Popover
 - [x] Mermaid
+- [x] Callout
 - [x] Toolbar
 - [x] Button mode
 - [x] Preview mode
 - [x] Portal mode
-- [ ] Support for all file formats
-  - images
-  - videos
-  - embeds
-  - ...
-- [ ] Performance improvements
+- [x] Support for various file formats
+  - image `png|jpg|jpeg|gif|bmp|svg|webp`
+  - video `mp4|webm|ogv|avi|mov|flv|wmv|mkv|mpg|mpeg|m4v`
+  - audio `mp3|wav|m4a|ogg|3gp|flac`
+  - iframe `pdf`
+  - youtube link
 
 <br/>
 
@@ -63,18 +64,26 @@ export { Mindmap } from "./mindmap"
 ## 5. Edit `quartz/plugins/transformers/links.ts`
 - Add `export` before `interface Options` and `const defaultOptions`
 ```ts
-export interface Options {
+17 export interface Options {
   ...
 }
 
-export const defaultOptions: Options = {
+27 export const defaultOptions: Options = {
   ...
 }
 ```
 
 <br/>
 
-## 6. Edit `quartz/components/scripts/popover.inline.ts`
+## 6. Edit `quartz/plugins/transformers/ofm.ts`
+- add `export` before `function canonicalizeCallout(calloutName: string): keyof typeof calloutMapping {`
+```ts
+104 export function canonicalizeCallout(calloutName: string): keyof typeof calloutMapping {
+```
+
+<br/>
+
+## 7. Edit `quartz/components/scripts/popover.inline.ts`
 - Add this at the end of the file
 ```ts
 export { mouseEnterHandler, clearActivePopover }
@@ -82,7 +91,7 @@ export { mouseEnterHandler, clearActivePopover }
 
 <br/>
 
-## 7. Replace `i18n` or `edit title`
+## 9. Replace `i18n` or `edit title`
 - `quartz/components/Mindmap.tsx`
 ```ts
 130         <h3>{i18n(cfg.locale).components.mindmap.title}</h3> // by replacing the i18n
@@ -94,7 +103,7 @@ export { mouseEnterHandler, clearActivePopover }
 
 <br/>
 
-## 8. Edit `quartz.config.ts`
+## 10. Edit `quartz.config.ts`
 - Add the transformer
 - (!) **The options must be the same as those of CrawlLinks.**
 ```ts
@@ -111,12 +120,13 @@ export { mouseEnterHandler, clearActivePopover }
 
 <br/>
 
-## 9. Edit `quartz.layout.ts`
+## 11. Edit `quartz.layout.ts`
 - Use one of three mode options: view, button, or global.
 ```ts
 Component.Mindmap({
   mode: "view" | "button" | "global", // choose  one
   localOptions: {},
+  globalOptions: {}, // for global mode
 }),
 ```
 - `global`
@@ -132,7 +142,7 @@ export const sharedPageComponents: SharedLayout = {
   anywhere: [
     Component.Mindmap({
       mode: "global",
-      globalOptions: {},
+      globalOptions: {}, // globalOptions
     }),
   ]
 }
@@ -154,6 +164,54 @@ export const defaultContentPageLayout: PageLayout = {
   ]
 }
 ```
+### Options
+- [markmap options](https://markmap.js.org/docs/json-options)
+- `localOptions` default
+  ```json
+   // json options
+    colorFreezeLevel: 2,
+    duration: 500,
+    maxWidth: 0,
+    initialExpandLevel: -1,
+    zoom: true,
+    pan: true,
+    spacingHorizontal: 80,
+    spacingVertical: 5,
+
+    // https://markmap.js.org/api/interfaces/markmap-view.IMarkmapOptions.html
+    scrollForPan: false,
+
+    // toolbar on|off
+    zoomInIcon: true,
+    zoomOutIcon: true,
+    resetIcon: true,
+    recurseIcon: false,
+  ```
+- `globalOptions` default
+  ```json
+   // json options
+    colorFreezeLevel: 2,
+    duration: 500,
+    maxWidth: 0,
+    initialExpandLevel: -1,
+    zoom: true,
+    pan: true,
+    spacingHorizontal: 80,
+    spacingVertical: 7,
+
+    // https://markmap.js.org/api/interfaces/markmap-view.IMarkmapOptions.html
+    scrollForPan: false,
+
+    // toolbar on|off
+    zoomInIcon: true,
+    zoomOutIcon: true,
+    resetIcon: true,
+    recurseIcon: true,
+
+    //only global
+    expandIcon: true,
+    closeIcon: true,
+  ```
 
 <br/>
 

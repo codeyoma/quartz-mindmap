@@ -32,6 +32,16 @@
         margin-bottom: 0;
       }
 
+      blockquote {
+        max-width: 640px;
+        width: auto;
+        margin-bottom: .1em;
+
+        .callout-content {
+          padding-bottom: .5em;
+        }
+      }
+
       text,
       foreignObject,
       foreignObject * {
@@ -40,13 +50,20 @@
         pointer-events: none !important;
       }
 
-      foreignObject a {
-        pointer-events: auto !important;
-        user-select: text !important;
+      foreignObject {
 
-        .external-icon {
-          margin: 0 !important;
-          padding: 0 !important;
+        a,
+        img,
+        video,
+        audio,
+        iframe {
+          pointer-events: auto !important;
+          user-select: text !important;
+
+          .external-icon {
+            margin: 0 !important;
+            padding: 0 !important;
+          }
         }
       }
     }
