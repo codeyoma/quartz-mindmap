@@ -4,6 +4,7 @@ import { GlobalMindmapConfig, LocalMindmapConfig } from '../Mindmap'
 import { Markmap, deriveOptions } from "markmap-view"
 import { Toolbar } from "markmap-toolbar"
 import { IPureNode } from 'markmap-common'
+import { h } from 'preact'
 
 const externalIcon = `
 <svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em; margin-left:0.2em;" viewBox="0 0 512 512">
@@ -29,6 +30,24 @@ const exitIcon = `
         d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
 </svg>`
 
+function fixForeignObjectReplaceElementErrorInSafari(layout: HTMLElement) {
+  layout.querySelectorAll("video, audio, iframe").forEach(el => {
+    const src = el.getAttribute("data-src") ?? el.getAttribute("src") ?? el.querySelector("source")?.getAttribute("src")
+    if (!src) return
+    const type = el.getAttribute("data-type") ?? el.tagName.toLowerCase()
+    const place = el.getAttribute("data-place") ?? "internal"
+
+    const a = Object.assign(document.createElement("a"), {
+      href: src,
+      target: "_blank",
+      className: `media-fallback ${place}`,
+      textContent: `${type} - ${src}`,
+    })
+
+    el.parentElement?.replaceChild(a, el)
+    a.style.display = "inline-block"
+  })
+}
 
 function renderMermaidInMindmap(svg: SVGSVGElement) {
   requestAnimationFrame(async () => {
@@ -164,7 +183,7 @@ function addExternalIcon(svg: SVGSVGElement) {
   })
 }
 
-async function renderMindmap(mindmap: HTMLElement) {
+async function renderMindmap(mindmap: HTMLElement, isSafari = false) {
   removeAllChildren(mindmap)
 
   if (!mindmap.dataset["mindmap"]) {
@@ -186,8 +205,9 @@ async function renderMindmap(mindmap: HTMLElement) {
 
   renderToolbar(mindmap, mm, option)
   renderMermaidInMindmap(svg)
-  addExternalIcon(svg)
   renderPopoverInMindmap()
+  isSafari && fixForeignObjectReplaceElementErrorInSafari(mindmap)
+  addExternalIcon(svg)
 
   return () => {
     mindmap.innerHTML = ""
@@ -220,7 +240,7 @@ document.addEventListener("nav", async () => {
     const mindmapContainers = document.getElementsByClassName("mindmap-container")
     for (const container of mindmapContainers) {
       isSafari && container.classList.add("is-safari")
-      localMindmapCleanups.push(await renderMindmap(container as HTMLElement))
+      localMindmapCleanups.push(await renderMindmap(container as HTMLElement, isSafari))
     }
   }
 
@@ -247,7 +267,7 @@ document.addEventListener("nav", async () => {
       registerEscapeHandler(container, hideGlobalMindmap)
       if (mindmapContainer) {
         isSafari && mindmapContainer.classList.add("is-safari")
-        globalMindmapCleanups.push(await renderMindmap(mindmapContainer))
+        globalMindmapCleanups.push(await renderMindmap(mindmapContainer, isSafari))
       }
     }
   }

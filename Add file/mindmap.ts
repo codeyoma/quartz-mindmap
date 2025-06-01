@@ -91,17 +91,21 @@ function wikilinkReplacement(currentSlug: FullSlug, transformOptions: TransformO
         const imageEmbedMatch = imageEmbedRegex.exec(displayText || "")
         const width = imageEmbedMatch?.groups?.width ? imageEmbedMatch?.groups?.width + "px" : "auto"
         const height = imageEmbedMatch?.groups?.height ? imageEmbedMatch?.groups?.height + "px" : "auto"
-        return `<img src="${url}" alt="${fragment ?? displayText ?? link}" style="height:${height}; width:${width}; max-width: 640px;" />`
+        return `<img src="${url}" alt="${fragment ?? displayText ?? link}" style="height:${height}; width:${width};" />`
       }
-      //  else if (/\.(mp4|webm|ogv|avi|mov|flv|wmv|mkv|mpg|mpeg|m4v)$/.test(link)) {
-      //   return `
-      //   <video src="${url}" controls/>
-      //   `
-      // } else if (/\.(mp3|wav|m4a|ogg|3gp|flac)$/.test(link)) {
-      //   return `<audio src="${url}" controls />`
-      // } else if (/\.(pdf)$/.test(link)) {
-      //   return `<iframe src="${url}" class="pdf" />`
-      // }
+      else if (/\.(mp4|webm|ogv|avi|mov|flv|wmv|mkv|mpg|mpeg|m4v)$/.test(link)) {
+        return `
+            <video src="${url}" data-type="video" controls width="640px" height="360px"/>
+        `
+      } else if (/\.(mp3|wav|m4a|ogg|3gp|flac)$/.test(link)) {
+        return `
+            <audio src="${url}" data-type="audio" controls />
+        `
+      } else if (/\.(pdf)$/.test(link)) {
+        return `
+            <iframe src="${url}" class="pdf" data-type="pdf" />
+        `
+      }
 
       return `<a href="${url}" class="internal">${displayText || link}</a>`
     } else if (tag) {
@@ -117,16 +121,16 @@ function ytLinkReplacement() {
       const embedUrl = toYouTubeEmbedURL(match[1])
       if (embedUrl) {
         return `
-          <a href="${embedUrl}" class="external" target="_blank" > ${match[1]}</a>
+          <iframe
+            data-type="youtube"
+            data-place="external"
+            data-src="${match[1]}"
+            class="external-embed youtube"
+            allow="fullscreen"
+            frameborder="0"
+            src="${embedUrl}">
+          </iframe>
         `
-        // return `
-        //   <iframe
-        //     class="external-embed youtube"
-        //     allow="fullscreen"
-        //     frameborder="0"
-        //     src="${embedUrl}">
-        //   </iframe>
-        // `
       }
     }
     return match[0]

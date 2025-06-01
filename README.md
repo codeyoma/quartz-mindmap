@@ -6,19 +6,22 @@
   - click button
 
 ## Supported Features
-- [x] Popover
-- [x] Mermaid
-- [x] Callout
-- [x] Toolbar
-- [x] Button mode
-- [x] Preview mode
-- [x] Portal mode
-- [x] Support for various file formats
-  - [x] image `png|jpg|jpeg|gif|bmp|svg|webp`
-  - [ ] video `mp4|webm|ogv|avi|mov|flv|wmv|mkv|mpg|mpeg|m4v`
-  - [ ] audio `mp3|wav|m4a|ogg|3gp|flac`
-  - [ ] iframe `pdf`
-  - [ ] youtube link
+- Popover
+- Mermaid
+- Callout
+- Toolbar
+- Button mode
+- Preview mode
+- Portal mode
+- Support for various file formats
+  - image `png|jpg|jpeg|gif|bmp|svg|webp`
+  - chrome
+    - video `mp4|webm|ogv|avi|mov|flv|wmv|mkv|mpg|mpeg|m4v`
+    - audio `mp3|wav|m4a|ogg|3gp|flac`
+    - iframe `pdf`
+    - youtube link
+  - safari
+    - Partial support video, audio, iframe, youtube
 
 <br/>
 
@@ -178,10 +181,10 @@ export const defaultContentPageLayout: PageLayout = {
     pan: true,
     spacingHorizontal: 80,
     spacingVertical: 5,
-  
+
     // https://markmap.js.org/api/interfaces/markmap-view.IMarkmapOptions.html
     scrollForPan: false,
-  
+
     // toolbar on|off
     zoomInIcon: true,
     zoomOutIcon: true,
@@ -201,16 +204,16 @@ export const defaultContentPageLayout: PageLayout = {
     pan: true,
     spacingHorizontal: 80,
     spacingVertical: 7,
-  
+
     // https://markmap.js.org/api/interfaces/markmap-view.IMarkmapOptions.html
     scrollForPan: false,
-  
+
     // toolbar on|off
     zoomInIcon: true,
     zoomOutIcon: true,
     resetIcon: true,
     recurseIcon: true,
-  
+
     //only global
     expandIcon: true,
     closeIcon: true,

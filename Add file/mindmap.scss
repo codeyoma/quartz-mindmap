@@ -30,6 +30,7 @@
       img {
         margin-top: 1em;
         margin-bottom: 0;
+        max-width: 300px;
       }
 
       blockquote {
@@ -44,6 +45,24 @@
         .callout-content {
           padding-bottom: .5em;
         }
+      }
+
+      audio {
+        width: 500px;
+      }
+
+      video {
+        width: 500px;
+        height: auto;
+      }
+
+      iframe.youtube {
+        width: 500px;
+      }
+
+      iframe.pdf {
+        width: 960px;
+        height: 540px;
       }
 
       foreignObject,
