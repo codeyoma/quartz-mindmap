@@ -171,6 +171,8 @@ async function renderMindmap(mindmap: HTMLElement) {
     return () => { }
   }
 
+  const data: IPureNode = JSON.parse(decodeURIComponent(mindmap.dataset["mindmap"]))
+
   const option = JSON.parse(mindmap.dataset["cfg"]!)
   const markmapOptions = deriveOptions(option);
   markmapOptions.scrollForPan = option.scrollForPan;
@@ -179,8 +181,7 @@ async function renderMindmap(mindmap: HTMLElement) {
   svg.setAttribute("width", "100%")
   svg.setAttribute("height", "100%")
   mindmap.appendChild(svg)
-
-  const mm = Markmap.create(svg, markmapOptions, JSON.parse(decodeURIComponent(mindmap.dataset["mindmap"])) as IPureNode)
+  const mm = Markmap.create(svg, markmapOptions, data)
   mm.fit()
 
   renderToolbar(mindmap, mm, option)

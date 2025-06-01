@@ -14,11 +14,11 @@
 - [x] Preview mode
 - [x] Portal mode
 - [x] Support for various file formats
-  - image `png|jpg|jpeg|gif|bmp|svg|webp`
-  - video `mp4|webm|ogv|avi|mov|flv|wmv|mkv|mpg|mpeg|m4v`
-  - audio `mp3|wav|m4a|ogg|3gp|flac`
-  - iframe `pdf`
-  - youtube link
+  - [x] image `png|jpg|jpeg|gif|bmp|svg|webp`
+  - [ ] video `mp4|webm|ogv|avi|mov|flv|wmv|mkv|mpg|mpeg|m4v`
+  - [ ] audio `mp3|wav|m4a|ogg|3gp|flac`
+  - [ ] iframe `pdf`
+  - [ ] youtube link
 
 <br/>
 

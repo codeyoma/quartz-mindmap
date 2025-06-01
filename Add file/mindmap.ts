@@ -69,101 +69,108 @@ function toYouTubeEmbedURL(link: string) {
   }
 }
 
-export const Mindmap: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
-  const opts = { ...defaultOptions, ...userOpts }
+const transformer = new Transformer([
+  ...builtInPlugins,
+])
 
-  return {
-    name: "Mindmap",
-    markdownPlugins(ctx) {
-      const transformer = new Transformer([
-        ...builtInPlugins,
-      ])
-      const transformOptions: TransformOptions = {
-        strategy: opts.markdownLinkResolution,
-        allSlugs: ctx.allSlugs,
+function wikilinkReplacement(currentSlug: FullSlug, transformOptions: TransformOptions) {
+  return (match: RegExpExecArray) => {
+    const { link, fragment, displayText, tag } = match.groups!
+
+    if (link) {
+      let url = transformLink(currentSlug, encodeURI(decode(link.trim() + (fragment ? "#" + fragment.trim() : ""))), transformOptions)
+
+      if (match[1] !== "!") {
+        return `<a href="${url}" class="internal">${displayText || link + (fragment ? "#" + fragment : "")}</a>`
       }
 
-      function wikilinkReplacement(currentSlug: FullSlug) {
-        return (match: RegExpExecArray) => {
-          const { link, fragment, displayText, tag } = match.groups!
-
-          if (link) {
-            let url = transformLink(currentSlug, encodeURI(decode(link.trim() + (fragment ? "#" + fragment.trim() : ""))), transformOptions)
-
-            if (match[1] !== "!") {
-              return `<a href="${url}" class="internal">${displayText || link + (fragment ? "#" + fragment : "")}</a>`
-            }
-
-            if (/\.(png|jpg|jpeg|gif|bmp|svg|webp)$/.test(link)) {
-              if (fragment) {
-                url = transformLink(currentSlug, encodeURI(decode(link.trim())), transformOptions)
-              }
-              const imageEmbedMatch = imageEmbedRegex.exec(displayText || "")
-              const width = imageEmbedMatch?.groups?.width ? imageEmbedMatch?.groups?.width + "px" : "auto"
-              const height = imageEmbedMatch?.groups?.height ? imageEmbedMatch?.groups?.height + "px" : "auto"
-              return `<img src="${url}" alt="${fragment ?? displayText ?? link}" style="height:${height}; width:${width}; max-width: 640px;" />`
-            } else if (/\.(mp4|webm|ogv|avi|mov|flv|wmv|mkv|mpg|mpeg|m4v)$/.test(link)) {
-              return `<video src="${url}" controls></video>`
-            } else if (/\.(mp3|wav|m4a|ogg|3gp|flac)$/.test(link)) {
-              return `<audio src="${url}" controls style="width: 640px;"></audio>`
-            } else if (/\.(pdf)$/.test(link)) {
-              return `<iframe src="${url}" class="pdf" style="width: 860px;"></iframe>`
-            }
-
-            return `<a href="${url}" class="internal">${displayText || link}</a>`
-          } else if (tag) {
-            return `<a href="/tags/${tag}" class="internal">#${tag}</a>`
-          }
-          return match[0]
+      if (/\.(png|jpg|jpeg|gif|bmp|svg|webp)$/.test(link)) {
+        if (fragment) {
+          url = transformLink(currentSlug, encodeURI(decode(link.trim())), transformOptions)
         }
+        const imageEmbedMatch = imageEmbedRegex.exec(displayText || "")
+        const width = imageEmbedMatch?.groups?.width ? imageEmbedMatch?.groups?.width + "px" : "auto"
+        const height = imageEmbedMatch?.groups?.height ? imageEmbedMatch?.groups?.height + "px" : "auto"
+        return `<img src="${url}" alt="${fragment ?? displayText ?? link}" style="height:${height}; width:${width}; max-width: 640px;" />`
       }
+      //  else if (/\.(mp4|webm|ogv|avi|mov|flv|wmv|mkv|mpg|mpeg|m4v)$/.test(link)) {
+      //   return `
+      //   <video src="${url}" controls/>
+      //   `
+      // } else if (/\.(mp3|wav|m4a|ogg|3gp|flac)$/.test(link)) {
+      //   return `<audio src="${url}" controls />`
+      // } else if (/\.(pdf)$/.test(link)) {
+      //   return `<iframe src="${url}" class="pdf" />`
+      // }
 
-      function ytLinkReplacement() {
-        return (match: RegExpExecArray) => {
-          if (match[1]) {
-            const embedUrl = toYouTubeEmbedURL(match[1])
-            if (embedUrl) {
-              return `
-                <iframe
-                  class="external-embed youtube"
-                  allow="fullscreen"
-                  frameborder="0"
-                  src="${embedUrl}">
-                </iframe>
-                `
-            }
-          }
-          return match[0]
-        }
+      return `<a href="${url}" class="internal">${displayText || link}</a>`
+    } else if (tag) {
+      return `<a href="/tags/${tag}" class="internal">#${tag}</a>`
+    }
+    return match[0]
+  }
+}
+
+function ytLinkReplacement() {
+  return (match: RegExpExecArray) => {
+    if (match[1]) {
+      const embedUrl = toYouTubeEmbedURL(match[1])
+      if (embedUrl) {
+        return `
+          <a href="${embedUrl}" class="external" target="_blank" > ${match[1]}</a>
+        `
+        // return `
+        //   <iframe
+        //     class="external-embed youtube"
+        //     allow="fullscreen"
+        //     frameborder="0"
+        //     src="${embedUrl}">
+        //   </iframe>
+        // `
       }
+    }
+    return match[0]
+  }
+}
 
-      function calloutReplacement() {
-        return (match: RegExpExecArray) => {
-          const { type, remain } = match.groups!
+function calloutReplacement() {
+  return (match: RegExpExecArray) => {
+    const { type, remain } = match.groups!
 
-          if (type) {
-            const typeClass = canonicalizeCallout(type.toLowerCase())
-            const contents = remain.replace(/<br\s*\/?>/g, "")
-            return `
+    if (type) {
+      const typeClass = canonicalizeCallout(type.toLowerCase())
+      const contents = remain.replace(/<br\s*\/?>/g, "")
+      return `
             <blockquote class="callout ${typeClass}" data-callout="${typeClass}" style="max-width: 640px; width: auto;">
               <div class="callout-title">
                 <div class="callout-icon"></div>
                 <div class="callout-title-inner"><p>${type}</p></div>
               </div>
               ${contents ?
-                `
+          `
                 <div class="callout-content">
                   <div class="callout-content-inner">
                     <p>${contents}</p>
                   </div>
                 </div>
                 `
-                : ""}
+          : ""}
             </blockquote>
             `
-          }
-          return match[0]
-        }
+    }
+    return match[0]
+  }
+}
+
+export const Mindmap: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
+  const opts = { ...defaultOptions, ...userOpts }
+
+  return {
+    name: "Mindmap",
+    markdownPlugins(ctx) {
+      const transformOptions: TransformOptions = {
+        strategy: opts.markdownLinkResolution,
+        allSlugs: ctx.allSlugs,
       }
 
       function processMindmapFile(file: any, transformer: Transformer, slug: FullSlug) {
@@ -173,7 +180,7 @@ export const Mindmap: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => 
           node.content = replaceMatches(
             node.content,
             wikilinkRegex,
-            wikilinkReplacement(slug)
+            wikilinkReplacement(slug, transformOptions)
           )
           node.content = replaceMatches(
             node.content,
