@@ -1,7 +1,7 @@
 # Quartz-Mindmap
 - It’s a custom plugin that enables mindmap in [Quartz 4](https://quartz.jzhao.xyz/).
 - built using [markmap](https://markmap.js.org/).
-- [demo](https://yoma.kr/Computer-Science/1-Foundations--and--Theory/Algorithms/DP)
+- [demo](https://yoma.kr/z-index/Guideline)
   - `cmd / ctrl` + `m`
   - click button
 
