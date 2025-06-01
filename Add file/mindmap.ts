@@ -141,7 +141,7 @@ function calloutReplacement() {
       const typeClass = canonicalizeCallout(type.toLowerCase())
       const contents = remain.replace(/<br\s*\/?>/g, "")
       return `
-            <blockquote class="callout ${typeClass}" data-callout="${typeClass}" style="max-width: 640px; width: auto;">
+            <blockquote class="callout ${typeClass}" data-callout="${typeClass}">
               <div class="callout-title">
                 <div class="callout-icon"></div>
                 <div class="callout-title-inner"><p>${type}</p></div>

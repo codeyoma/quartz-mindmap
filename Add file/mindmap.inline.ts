@@ -213,10 +213,13 @@ function cleanupGlobalMindmaps() {
 
 document.addEventListener("nav", async () => {
 
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+
   async function renderLocalMindmap() {
     cleanupLocalMindmaps()
     const mindmapContainers = document.getElementsByClassName("mindmap-container")
     for (const container of mindmapContainers) {
+      isSafari && container.classList.add("is-safari")
       localMindmapCleanups.push(await renderMindmap(container as HTMLElement))
     }
   }
@@ -243,6 +246,7 @@ document.addEventListener("nav", async () => {
       const mindmapContainer = container.querySelector(".global-mindmap-container") as HTMLElement
       registerEscapeHandler(container, hideGlobalMindmap)
       if (mindmapContainer) {
+        isSafari && mindmapContainer.classList.add("is-safari")
         globalMindmapCleanups.push(await renderMindmap(mindmapContainer))
       }
     }

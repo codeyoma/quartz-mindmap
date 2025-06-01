@@ -33,9 +33,13 @@
       }
 
       blockquote {
-        max-width: 640px;
-        width: auto;
+        width: auto !important;
+        max-width: 640px !important;
         margin-bottom: .1em;
+
+        .callout-icon {
+          margin: auto 0;
+        }
 
         .callout-content {
           padding-bottom: .5em;
@@ -64,6 +68,21 @@
             padding: 0 !important;
           }
         }
+      }
+    }
+  }
+
+
+  .is-safari {
+    .markmap {
+      .callout-icon {
+        -webkit-mask-image: none !important;
+        mask-image: none !important;
+        background-image: var(--callout-icon) !important;
+        background-repeat: no-repeat;
+        background-color: unset !important;
+        background-size: contain;
+        background-position: center;
       }
     }
   }
