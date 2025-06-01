@@ -167,8 +167,9 @@ export const defaultContentPageLayout: PageLayout = {
 ### Options
 - [markmap options](https://markmap.js.org/docs/json-options)
 - `localOptions` default
-  ```json
-   // json options
+  ```ts
+  {
+    // json options
     colorFreezeLevel: 2,
     duration: 500,
     maxWidth: 0,
@@ -177,19 +178,21 @@ export const defaultContentPageLayout: PageLayout = {
     pan: true,
     spacingHorizontal: 80,
     spacingVertical: 5,
-
+  
     // https://markmap.js.org/api/interfaces/markmap-view.IMarkmapOptions.html
     scrollForPan: false,
-
+  
     // toolbar on|off
     zoomInIcon: true,
     zoomOutIcon: true,
     resetIcon: true,
     recurseIcon: false,
+  }
   ```
 - `globalOptions` default
-  ```json
-   // json options
+  ```ts
+  {
+    // json options
     colorFreezeLevel: 2,
     duration: 500,
     maxWidth: 0,
@@ -198,19 +201,20 @@ export const defaultContentPageLayout: PageLayout = {
     pan: true,
     spacingHorizontal: 80,
     spacingVertical: 7,
-
+  
     // https://markmap.js.org/api/interfaces/markmap-view.IMarkmapOptions.html
     scrollForPan: false,
-
+  
     // toolbar on|off
     zoomInIcon: true,
     zoomOutIcon: true,
     resetIcon: true,
     recurseIcon: true,
-
+  
     //only global
     expandIcon: true,
     closeIcon: true,
+  }
   ```
 
 <br/>
