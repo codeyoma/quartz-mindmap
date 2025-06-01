@@ -91,7 +91,7 @@ export { mouseEnterHandler, clearActivePopover }
 
 <br/>
 
-## 9. Replace `i18n` or `edit title`
+## 8. Replace `i18n` or `edit title`
 - `quartz/components/Mindmap.tsx`
 ```ts
 130         <h3>{i18n(cfg.locale).components.mindmap.title}</h3> // by replacing the i18n
@@ -103,7 +103,7 @@ export { mouseEnterHandler, clearActivePopover }
 
 <br/>
 
-## 10. Edit `quartz.config.ts`
+## 9. Edit `quartz.config.ts`
 - Add the transformer
 - (!) **The options must be the same as those of CrawlLinks.**
 ```ts
@@ -120,7 +120,7 @@ export { mouseEnterHandler, clearActivePopover }
 
 <br/>
 
-## 11. Edit `quartz.layout.ts`
+## 10. Edit `quartz.layout.ts`
 - Use one of three mode options: view, button, or global.
 ```ts
 Component.Mindmap({
