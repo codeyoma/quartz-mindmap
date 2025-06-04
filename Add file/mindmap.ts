@@ -16,6 +16,11 @@ const wikilinkRegex = /(!)?\[\[(?<link>[^|\]#]+)(?:#(?<fragment>[^|\]]+))?\|?(?<
 const imageEmbedRegex = /^(?<width>\d+)(x(?<height>\d+))?$/
 const youtubeImageRegex = /<img\b[^>]*\bsrc=["'](https?:\/\/(?:www\.)?youtu[^\s"'>]*)["'][^>]*>/g
 const calloutRegex = /<blockquote\b[^>]*>\s*<p\b[^>]*>\s*\[!(?<type>\w+)\]\s*(?<remain>[\s\S]*?)<\/p>/g
+const codeBlockRegex = /<code\b[^>]*>[\s\S]*?<\/code>/g
+
+const transformer = new Transformer([
+  ...builtInPlugins,
+])
 
 const recurseChildren = (fn: (node: IPureNode) => void) => (node: IPureNode) => {
   fn(node)
@@ -36,6 +41,25 @@ function replaceMatches(str: string, regex: RegExp, replacer: (match: RegExpExec
   for (const match of matches)
     accumulator = accumulator.replace(match[0], replacer(match))
   return accumulator
+}
+
+function replaceMatchesExcept(
+  str: string,
+  regex: RegExp,
+  replacer: (match: RegExpExecArray) => string,
+  exceptRegex: RegExp,
+  exceptPlaceholder: string
+): string {
+  const codeBlocks: string[] = []
+  let protectedStr = str.replace(exceptRegex, (codeBlock) => {
+    codeBlocks.push(codeBlock)
+    return `___${exceptPlaceholder}_${codeBlocks.length - 1}___`
+  })
+
+  protectedStr = replaceMatches(protectedStr, regex, replacer)
+  const restoreRegex = new RegExp(`___${exceptPlaceholder}_(\\d+)___`, 'g')
+
+  return protectedStr.replace(restoreRegex, (_, i) => codeBlocks[+i])
 }
 
 function toYouTubeEmbedURL(link: string) {
@@ -68,10 +92,6 @@ function toYouTubeEmbedURL(link: string) {
     return null
   }
 }
-
-const transformer = new Transformer([
-  ...builtInPlugins,
-])
 
 function wikilinkReplacement(currentSlug: FullSlug, transformOptions: TransformOptions) {
   return (match: RegExpExecArray) => {
@@ -181,10 +201,12 @@ export const Mindmap: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => 
         const root: IPureNode = transformer.transform(String(file.value)).root
 
         recurseChildren((node) => {
-          node.content = replaceMatches(
+          node.content = replaceMatchesExcept(
             node.content,
             wikilinkRegex,
-            wikilinkReplacement(slug, transformOptions)
+            wikilinkReplacement(slug, transformOptions),
+            codeBlockRegex,
+            "CODEBLOCK"
           )
           node.content = replaceMatches(
             node.content,
