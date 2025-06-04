@@ -38,10 +38,10 @@ npm i markmap-lib markmap-view markmap-toolbar he @types/he
 <br/>
 
 ## 2. Add files
-- `mindmap.ts` -> `quartz/plugins/transformers`
-- `Mindmap.tsx` -> `quartz/components`
-- `mindmap.inline.ts` -> `quartz/components/scripts`
-- `mindmap.scss` -> `quartz/components/styles`
+- `mindmap.ts` -> `quartz/plugins/transformers/`
+- `Mindmap.tsx` -> `quartz/components/`
+- `mindmap.inline.ts` -> `quartz/components/scripts/`
+- `mindmap.scss` -> `quartz/components/styles/`
 
 <br/>
 
@@ -94,16 +94,12 @@ export { mouseEnterHandler, clearActivePopover }
 
 <br/>
 
-## 8. Replace `i18n` or `edit title`
+## 8. Replace `i18n` (option)
 - `quartz/components/Mindmap.tsx`
+- If using i18n
 ```ts
 130         <h3>{i18n(cfg.locale).components.mindmap.title}</h3> // by replacing the i18n
 ```
-- If not using i18n
-```ts
-130         <h3>Mind Map</h3> // edit title
-```
-
 <br/>
 
 ## 9. Edit `quartz.config.ts`
@@ -142,9 +138,13 @@ Component.Mindmap({
 
 ```ts
 export const sharedPageComponents: SharedLayout = {
+  afterBody: [
+    ...,
+    Component.Mindmap(), // view mode
+  ]
   anywhere: [
     Component.Mindmap({
-      mode: "global",
+      mode: "global",  // global portal
       globalOptions: {}, // globalOptions
     }),
   ]
@@ -153,20 +153,16 @@ export const sharedPageComponents: SharedLayout = {
 export const defaultContentPageLayout: PageLayout = {
 // or export const defaultListPageLayout: PageLayout = {
   left: [
-    Component.Mindmap({
-      mode: "button",
-      localOptions: {},
-    }),
-  ]
-
-  right:[
-    Component.Mindmap({
-      mode: "view",
-      localOptions: {},
-    }),
+    Component.Flex({
+      components:[
+        ...,
+        { Component: Component.Mindmap({ mode: "button", localOptions: {}}) },
+      ]
+    })
   ]
 }
 ```
+
 ### Options
 - [markmap options](https://markmap.js.org/docs/json-options)
 - `localOptions` default

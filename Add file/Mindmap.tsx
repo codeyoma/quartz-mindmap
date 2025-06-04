@@ -127,7 +127,7 @@ export default ((opts?: Partial<MindmapOptions>) => {
 
     return (
       <div class={classNames(displayClass, "local-mindmap mindmap")}>
-        <h3>{i18n(cfg.locale).components.mindmap.title}</h3>
+        <h3>Mind Map</h3>
         <div class="mindmap-outer">
           <div
             class="mindmap-container"

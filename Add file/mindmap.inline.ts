@@ -4,7 +4,6 @@ import { GlobalMindmapConfig, LocalMindmapConfig } from '../Mindmap'
 import { Markmap, deriveOptions } from "markmap-view"
 import { Toolbar } from "markmap-toolbar"
 import { IPureNode } from 'markmap-common'
-import { h } from 'preact'
 
 const externalIcon = `
 <svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em; margin-left:0.2em;" viewBox="0 0 512 512">
