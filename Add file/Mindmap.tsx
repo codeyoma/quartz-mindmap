@@ -14,6 +14,10 @@ export interface LocalMindmapConfig {
   pan: boolean
   spacingHorizontal: number
   spacingVertical: number
+  lineWidth?: number
+  nodeMinHeight?: number
+  paddingX?: number
+  fitRatio?: number
   scrollForPan: boolean
   zoomInIcon: boolean
   zoomOutIcon: boolean
@@ -25,7 +29,6 @@ export interface GlobalMindmapConfig extends LocalMindmapConfig {
   expandIcon: boolean
   closeIcon: boolean
 }
-
 
 interface MindmapOptions {
   mode: "view" | "button" | "global"
@@ -59,6 +62,7 @@ const defaultOptions: MindmapOptions = {
     pan: true,
     spacingHorizontal: 80,
     spacingVertical: 7,
+    paddingX: 20,
     scrollForPan: false,
     zoomInIcon: true,
     zoomOutIcon: true,
@@ -127,7 +131,7 @@ export default ((opts?: Partial<MindmapOptions>) => {
 
     return (
       <div class={classNames(displayClass, "local-mindmap mindmap")}>
-        <h3>Mind Map</h3>
+        <h3>{i18n(cfg.locale).components.mindmap.title}</h3>
         <div class="mindmap-outer">
           <div
             class="mindmap-container"

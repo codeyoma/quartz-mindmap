@@ -182,6 +182,16 @@ function addExternalIcon(svg: SVGSVGElement) {
   })
 }
 
+function optionMaker(option: LocalMindmapConfig | GlobalMindmapConfig) {
+  return ({
+    ...deriveOptions(option),
+    scrollForPan: option.scrollForPan,
+    ...(option.paddingX && { paddingX: option.paddingX }),
+    ...(option.nodeMinHeight && { nodeMinHeight: option.nodeMinHeight }),
+    ...(option.fitRatio && { fitRatio: option.fitRatio }),
+  })
+}
+
 async function renderMindmap(mindmap: HTMLElement, isSafari = false) {
   removeAllChildren(mindmap)
 
@@ -192,8 +202,7 @@ async function renderMindmap(mindmap: HTMLElement, isSafari = false) {
   const data: IPureNode = JSON.parse(decodeURIComponent(mindmap.dataset["mindmap"]))
 
   const option = JSON.parse(mindmap.dataset["cfg"]!)
-  const markmapOptions = deriveOptions(option);
-  markmapOptions.scrollForPan = option.scrollForPan;
+  const markmapOptions = optionMaker(option);
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
   svg.setAttribute("width", "100%")
