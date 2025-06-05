@@ -1,9 +1,12 @@
 # Quartz-Mindmap
 - It’s a custom plugin that enables mindmap in [Quartz 4](https://quartz.jzhao.xyz/).
-- built using [markmap](https://markmap.js.org/).
+  - built using [markmap](https://markmap.js.org/).
 - [demo](https://yoma.kr/z-index/Guideline)
   - `cmd / ctrl` + `m`
   - click button
+- The mindmap is built from Markdown headings and lists.
+
+<br/>
 
 ## Supported Features
 - Popover
@@ -141,8 +144,6 @@ export const sharedPageComponents: SharedLayout = {
   afterBody: [
     ...,
     Component.Mindmap(), // view mode
-  ]
-  anywhere: [
     Component.Mindmap({
       mode: "global",  // global portal
       globalOptions: {}, // globalOptions
