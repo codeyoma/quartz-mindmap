@@ -24,7 +24,9 @@
 
       code {
         border-radius: 3px;
-        padding: 0;
+        padding: 7px;
+        background-color: var(--shiki-light-bg);
+        color: var(--shiki-light);
       }
 
       img {
