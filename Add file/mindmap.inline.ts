@@ -1,9 +1,10 @@
 import { registerEscapeHandler, removeAllChildren } from "./util"
 import { mouseEnterHandler, clearActivePopover } from './popover.inline'
 import { GlobalMindmapConfig, LocalMindmapConfig } from '../Mindmap'
-import { Markmap, deriveOptions } from "markmap-view"
+import { Markmap, deriveOptions, loadCSS } from "markmap-view"
 import { Toolbar } from "markmap-toolbar"
 import { IPureNode } from 'markmap-common'
+import { Transformer } from 'markmap-lib';
 
 const externalIcon = `
 <svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em; margin-left:0.2em;" viewBox="0 0 512 512">
@@ -198,6 +199,11 @@ async function renderMindmap(mindmap: HTMLElement, isSafari = false) {
   if (!mindmap.dataset["mindmap"]) {
     return () => { }
   }
+
+  const transformer = new Transformer();
+  const { scripts, styles } = transformer.getAssets();
+  if (styles)
+    loadCSS(styles);
 
   const data: IPureNode = JSON.parse(decodeURIComponent(mindmap.dataset["mindmap"]))
 

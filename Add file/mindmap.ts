@@ -4,10 +4,15 @@ import {
   FullSlug,
   transformLink,
 } from "../../util/path"
+import { JSResource, CSSResource } from "../../util/resources"
+import { canonicalizeCallout } from "./ofm"
 import { defaultOptions, Options } from './links'
+// @ts-ignore
+import mermaidScript from "../../components/scripts/mermaid.inline"
+import mermaidStyle from "../../components/styles/mermaid.inline.scss"
+
 import { IPureNode } from 'markmap-common'
 import { Transformer, builtInPlugins } from "markmap-lib"
-import { canonicalizeCallout } from "./ofm"
 import hePkg from "he";
 
 const { decode } = hePkg;
@@ -50,16 +55,16 @@ function replaceMatchesExcept(
   exceptRegex: RegExp,
   exceptPlaceholder: string
 ): string {
-  const codeBlocks: string[] = []
+  const reserve: string[] = []
   let protectedStr = str.replace(exceptRegex, (codeBlock) => {
-    codeBlocks.push(codeBlock)
-    return `___${exceptPlaceholder}_${codeBlocks.length - 1}___`
+    reserve.push(codeBlock)
+    return `___${exceptPlaceholder}_${reserve.length - 1}___`
   })
 
   protectedStr = replaceMatches(protectedStr, regex, replacer)
   const restoreRegex = new RegExp(`___${exceptPlaceholder}_(\\d+)___`, 'g')
 
-  return protectedStr.replace(restoreRegex, (_, i) => codeBlocks[+i])
+  return protectedStr.replace(restoreRegex, (_, i) => reserve[+i])
 }
 
 function toYouTubeEmbedURL(link: string) {
@@ -230,5 +235,23 @@ export const Mindmap: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => 
         }
       }]
     },
+    externalResources() {
+      const js: JSResource[] = []
+      const css: CSSResource[] = []
+
+      // js.push({
+      //   script: mermaidScript,
+      //   loadTime: "afterDOMReady",
+      //   contentType: "inline",
+      //   moduleType: "module",
+      // })
+
+      // css.push({
+      //   content: mermaidStyle,
+      //   inline: true,
+      // })
+
+      return { js, css }
+    }
   }
 }
